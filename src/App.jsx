@@ -192,4 +192,94 @@ export default function ATSResumeMatcher() {
           <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* Score */}
             <Card>
-              <div clas
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-sky-600" />
+                  <h2 className="font-semibold">ATS Compatibility (Real)</h2>
+                </div>
+                <span className="text-xs rounded-full bg-slate-100 px-2 py-0.5">Deterministic</span>
+              </div>
+
+              <div className="flex items-center justify-center">
+                <RadialBarChart width={260} height={220} innerRadius="70%" outerRadius="90%" data={scoreData} startAngle={90} endAngle={-270}>
+                  <PolarAngleAxis type="number" domain={[0,100]} tick={false} />
+                  <Tooltip formatter={(value) => `${value}%`} />
+                  <RadialBar minAngle={15} dataKey="value" cornerRadius={10} />
+                </RadialBarChart>
+              </div>
+
+              <div className="text-center -mt-6 text-4xl font-extrabold">{Math.round(results.score)}%</div>
+              <p className="text-center text-xs text-slate-500 mt-1">
+                Score = 0–100 combining TF-IDF similarity and JD keyword coverage.
+              </p>
+
+              <div className="mt-4 flex justify-center gap-2">
+                <button onClick={downloadReport} className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm bg-slate-900 text-white hover:bg-black">
+                  <Download className="h-4 w-4" /> Download JSON Report
+                </button>
+                <button onClick={() => { setStep(1); setResults(null); }} className="inline-flex items-center gap-2 rounded-2xl px-3 py-2 text-sm bg-slate-200">
+                  Back to Upload
+                </button>
+              </div>
+            </Card>
+
+            {/* Missing keywords */}
+            <Card>
+              <h2 className="font-semibold mb-2">High-Value Keywords You’re Missing</h2>
+              <ul className="space-y-1 text-sm">
+                {results.missingKeywords.length === 0 ? (
+                  <li className="text-emerald-700">Excellent — no high-value gaps detected.</li>
+                ) : results.missingKeywords.slice(0,20).map((kw) => (
+                  <li key={kw} className="flex items-start gap-2">
+                    <span className="mt-[6px] h-1.5 w-1.5 rounded-full bg-sky-500" />
+                    <span className="break-words">{kw}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            {/* Suggestions */}
+            <Card>
+              <h2 className="font-semibold mb-2">Concrete Suggestions</h2>
+              <ol className="list-decimal pl-5 text-sm space-y-2">
+                {results.suggestions.map((s, i) => (<li key={i} className="break-words">{s}</li>))}
+              </ol>
+            </Card>
+
+            {/* Matched and detail metrics */}
+            <Card className="xl:col-span-2">
+              <h2 className="font-semibold mb-2">Matched Keywords & Details</h2>
+              <div className="text-sm flex flex-wrap gap-2 mb-3">
+                {results.matchedKeywords.length === 0 ? <span className="text-xs text-slate-500">No exact phrase/unigram matches found.</span> : results.matchedKeywords.sort().map(k => (
+                  <span key={k} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-1">{k}</span>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs text-slate-600">
+                <div><strong>Cosine similarity (TF-IDF)</strong><div className="mt-1">{results.details.cosineSimilarity}</div></div>
+                <div><strong>Keyword coverage</strong><div className="mt-1">{results.details.keywordCoverage}</div></div>
+                <div className="col-span-2">
+                  <strong>JD top keywords (sample)</strong>
+                  <div className="mt-1 text-xs text-slate-500">{results.details.jdTopKeywords.slice(0,30).join(", ")}</div>
+                </div>
+              </div>
+            </Card>
+
+            <Card>
+              <h2 className="font-semibold mb-2">What’s next</h2>
+              <ul className="text-sm space-y-2">
+                <li><strong>Make phrase-aware:</strong> later integrate spaCy (noun chunks) on a backend for structured phrase extraction.</li>
+                <li><strong>Semantic upgrade:</strong> add sentence-transformers embeddings on a backend for deeper semantic matches.</li>
+                <li><strong>Keep it deterministic:</strong> always return JSON with {`score, matchedKeywords, missingKeywords, suggestions, details`}.</li>
+              </ul>
+            </Card>
+          </section>
+        )}
+      </main>
+
+      <footer className="py-10 text-center text-xs text-slate-500">
+        © {new Date().getFullYear()} • Free & open — no data leaves your browser unless you add a backend.
+      </footer>
+    </div>
+  );
+}
